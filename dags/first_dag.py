@@ -9,6 +9,7 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.operators.postgres_operator import PostgresOperator
 from preprocessData import preproc
 from mf import *
+import random
 
 def preprocess_df():
     batch_size = 200000
@@ -25,12 +26,13 @@ def preprocess_df():
 
         df.extend(records)
         offset+= batch_size
-    return preproc(df)
+    
+    return preproc(random.shuffle(df))
 
 def build_model(**kwargs):
     ti = kwargs['ti']
-    preprocessed_data = ti.xcom_pull(task_id = preprocess_df)
-    build_model(preprocessed_data)
+    train, test = ti.xcom_pull(task_id = preprocess_df)
+    build_model(train, test)
 
 with DAG(
     dag_id = 'first_af_dag',
