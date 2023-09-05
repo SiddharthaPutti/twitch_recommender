@@ -37,7 +37,6 @@ def preproc(df):
     df['ts'] = df['EndTime'] - df['StartTime']
     df = df.groupby(['useriD', 'StreamerName']).sum('ts').reset_index()
     df['combined'] = df['useriD'].astype(str) + '_' + df['StreamerName'].astype(str)
-
     df = df.sample(frac = 1, random_state = 42)
 
     train, test = split_data(df)
@@ -47,7 +46,7 @@ def preproc(df):
     filtered_test = test[mask]
 
     train_sparse = build_watch_sparse(train)
-    test_sparse = build_watch_sparse(test)
+    test_sparse = build_watch_sparse(filtered_test)
 
     # sparse_matrix = build_watch_sparse(df)
 

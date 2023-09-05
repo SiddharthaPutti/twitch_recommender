@@ -10,6 +10,9 @@ tf.config.run_functions_eagerly(True)
 
 # MSE
 def sparse_loss(sparse_matrix, user_emb, streamer_emb):
+    # tf.gather - from the original dataframe take respective column and and from that column values consider them as indiced of embeddings to matmul. 
+    # for example: sparse_matrix.indices[:,0] which is useriD's, take useriD as index of user_emb. 
+    # similarly for streameriD. for a corresponding user and streamer embedding now multiply them. 
     pred = tf.reduce_sum(
         tf.gather(user_emb, sparse_matrix.indices[:,0]) *
         tf.gather(streamer_emb, sparse_matrix.indices[:, 1]),
@@ -36,14 +39,20 @@ def embed_init(train, emb_dim = 3, init_stddev = 1):
 
     return U,V
 
+DOT= "dot"
+COSINE = 'cosine'
 
 
-class colab_filtering():
-    def __init__(self, train_sparse,test_sparse  U, V):
+class colab_filtering:
+    def __init__(self, train_sparse,test_sparse,  U, V):
         self.train_sparse = train_sparse
         self.test_sparse = test_sparse
         self.U = U
         self.V =V
+
+    def score(self, U,  measure):
+        scores = tf.reduce_sum(tf.multiply(self.V, U), axis = 1) / (tf.norm(self.V, axis = 1)* tf.norm(U))
+        return scores
 
     def train_step(self,num_iter = 1000, lr = 3e-4):
 
@@ -55,6 +64,23 @@ class colab_filtering():
 
             gradients = tape.gradient(loss, [self.U,self.V])
             optimizer.apply_gradients(zip(gradients, [self.U,self.V]))
+
+    def prediction(self, user_id = 10, k=6):
+        scores = self.score(self.U[user_id])
+        ordered_scores = np.argsort(scores)[::-1]
+        top_k = ordered_scores[:k]
+
+        return top_k
+
+
+def build_mf_model(train, test):
+    U,V = embed_init(train)
+
+    model = colab_filtering(train, test, U, V)
+    model.train_step()
+    rec = model.prediction(user_id= 512)
+    print(rec)
+
 
 
 

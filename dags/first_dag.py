@@ -30,9 +30,9 @@ def preprocess_df():
     return preproc(random.shuffle(df))
 
 def build_model(**kwargs):
-    ti = kwargs['ti']
-    train, test = ti.xcom_pull(task_id = preprocess_df)
-    build_model(train, test)
+    ti = kwargs['task_instance']
+    train, test = ti.xcom_pull(task_ids = 'preprocess_df', key='key_name')
+    build_mf_model(train, test)
 
 with DAG(
     dag_id = 'first_af_dag',
@@ -75,6 +75,6 @@ with DAG (
 ) as dag: 
     SGDregresor = PythonOperator(
         task_id = 'SGD',
-        python_callable = 'build_model',
+        python_callable = build_model,
         do_xcom_push = True
     )
