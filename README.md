@@ -22,4 +22,5 @@ I'll dive into the technicals:
     CALCULATE MSE(A, pred)
     update U,V with gradients  
   ```
-* let's assume U represents user embedding matrix and V represents streamer embeddings 
+* let's assume U represents user embedding matrix and V represents streamer embeddings.
+* U with (num_users, embd_dim) and V with (num_streamers, embd_dim) , here embd_dim is a hyperparameter/coder_defined.
