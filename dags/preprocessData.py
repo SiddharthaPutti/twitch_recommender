@@ -1,6 +1,7 @@
 import pandas as pd 
 import numpy as np 
 import tensorflow as tf
+tf.config.run_functions_eagerly(True)
 # from pyspark.sql import SparkSession
 # from pyspark.ml.feature import StringIndexer 
 cols = ['useriD','StreamId', 'StreamerName', 'StartTime', 'EndTime']
@@ -11,8 +12,8 @@ user - streamer - number of times used watched perticular streamer
 which is overall 2D
 """
 
-def split_data(df, hould_out = 0.1):
-    test = df.sample(frac = hould_out, replace = False)
+def split_data(df, hold_out = 0.1):
+    test = df.sample(frac = hold_out, replace = False)
     train = df[~df.index.isin(test.index)]
     return train, test
 
