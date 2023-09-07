@@ -13,8 +13,8 @@
 Twitch Streamer Recommendations:
 
 I'll dive into the technicals: 
-* We have a matrix of A = (users, streamers, watch_hours), We need to create two different matrices namely U, V with random initialization.
-* such that A ~ U*V (approximately equal). To achieve this we iteratively update U, and V by calculating the mean squared error.
+* We have a matrix of (users, streamers, watch_hours), We need to create two different matrices namely U, V with random initialization.
+* such that A ~ U*V (approximately equal). To achieve this we iteratively update U, and V by calculating the mean squared error.for which A is streaming hours. 
 * That is
 * ```python
   for _ in iterations:
