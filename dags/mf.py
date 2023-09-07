@@ -9,7 +9,7 @@ tf.config.run_functions_eagerly(True)
 #     pass
 
 # MSE
-def sparse_loss(sparse_matrix, user_emb, streamer_emb):
+def sparse_loss(sparse_matrix, user_emb, streamer_emb, l2_reg = 0):
     # tf.gather - from the original dataframe take respective column and and from that column values consider them as indiced of embeddings to matmul. 
     # for example: sparse_matrix.indices[:,0] which is useriD's, take useriD as index of user_emb. 
     # similarly for streameriD. for a corresponding user and streamer embedding now multiply them. 
@@ -20,14 +20,14 @@ def sparse_loss(sparse_matrix, user_emb, streamer_emb):
     )
 
     loss = tf.losses.mean_squared_error(sparse_matrix.values, pred)
-    return loss 
+    user_reg = l2_reg * tf.reduce_Sum(tf.square(user_emb))
+    streamer_reg = l2_reg * tf.reduce_Sum(tf.square(streamer_emb)) 
+    return loss + user_reg + streamer_reg
 
 
 def embed_init(train, emb_dim = 3, init_stddev = 1):
 
     num_users, num_streamers = train.shape
-
-
     xavier_init = tf.initializers.GlorotNormal()
 
     U = tf.Variable(xavier_init(
@@ -54,13 +54,13 @@ class colab_filtering:
         scores = tf.reduce_sum(tf.multiply(self.V, U), axis = 1) / (tf.norm(self.V, axis = 1)* tf.norm(U))
         return scores
 
-    def train_step(self,num_iter = 1000, lr = 3e-4):
+    def train_step(self,num_iter = 1000, lr = 3e-4, l2_reg = 0.01):
 
         optimizer = tf.keras.optimizers.Adam(lr)
 
         for i in range(num_iter):
             with tf.GradientTape() as tape: 
-                loss = sparse_loss(self.train_sparse, self.U,self.V)
+                loss = sparse_loss(self.train_sparse, self.U,self.V, l2_reg)
 
             gradients = tape.gradient(loss, [self.U,self.V])
             optimizer.apply_gradients(zip(gradients, [self.U,self.V]))

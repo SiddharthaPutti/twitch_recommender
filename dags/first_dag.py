@@ -31,7 +31,7 @@ def preprocess_df():
 
 def build_model(**kwargs):
     ti = kwargs['task_instance']
-    train, test = ti.xcom_pull(task_ids = 'preprocess_df', key='key_name')
+    train, test = ti.xcom_pull(task_ids = 'preprocess_dag', key='key_name')
     build_mf_model(train, test)
 
 with DAG(
@@ -46,12 +46,6 @@ with DAG(
         postgres_conn_id = "postgresql_rec",
         sql = "SQL/schema.sql",
     )
-
-    # update_db = PostgresOperator(
-    #     task_id = 'update_table',
-    #     postgres_conn_id = "postgresql_rec",
-    #     sql = "SQL/loadDf.sql",
-    # )
 
 with DAG(
     dag_id = 'preprocess_dag',
@@ -70,11 +64,23 @@ with DAG(
 with DAG (
     dag_id = 'SGD_dag',
     schedule_interval = '* * * * *',
-    start_date = datetime(year= 2023, month = 8, day =31),
+    start_date = datetime(year= 2023, month = 9, day =7),
     catchup = False
 ) as dag: 
     SGDregresor = PythonOperator(
         task_id = 'SGD',
         python_callable = build_model,
+        do_xcom_push = True
+    )
+
+with DAG (
+    dag_id = 'spark_session',
+    schedule_interval = '* * * * *',
+    start_date = datetime(year= 2023, month = 9, day =7),
+    catchup = False
+) as dag:
+    sparkALS = PythonOperator(
+        task_id = 'sprakALS',
+        python_callable = 'spark_ALS',
         do_xcom_push = True
     )
