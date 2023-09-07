@@ -32,3 +32,10 @@ I'll dive into the technicals:
       # you will get scores, then sort and select top K streamers
       ``` 
 * code executions without airflow dags can be found matfact.ipynb file.
+
+ALS: Alternating Least Squares
+* It is similar to matrix factorization as above:
+  * Instead A~U*V, where U, and V are updated after every iteration, we update U in one iteration keeping V constant and vice versa.
+  * ALS is naturally parallelizable and can handle large datasets more efficiently because it can distribute the computation of U and V factors across multiple machines or nodes.
+  * ALS is particularly well-suited for distributed computing frameworks like Apache Spark, making it more scalable for large datasets and easily parallelizable.
+  * ALS often converges faster than some gradient-based optimization techniques because it updates one set of latent factors at a time, leading to faster convergence, especially in recommendation scenarios.
